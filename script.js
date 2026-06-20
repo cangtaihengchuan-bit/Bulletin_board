@@ -146,6 +146,25 @@ const getAuthValues = () => ({
   password: passwordInput.value,
 });
 
+const getAuthMessage = (error, fallback) => {
+  const message = error?.message ?? "";
+  const lowerMessage = message.toLowerCase();
+
+  if (lowerMessage.includes("invalid login credentials")) {
+    return "メールアドレスまたはパスワードが違います。Supabaseで作成したユーザーのパスワードを確認してください。";
+  }
+
+  if (lowerMessage.includes("email not confirmed")) {
+    return "メール確認が未完了です。Supabaseのユーザー詳細で確認済みにするか、Email設定のConfirm emailをOFFにしてください。";
+  }
+
+  if (lowerMessage.includes("already been registered") || lowerMessage.includes("already registered")) {
+    return "このメールアドレスは登録済みです。同じパスワードでログインを試します。";
+  }
+
+  return `${fallback}: ${message}`;
+};
+
 const signIn = async () => {
   if (!client) {
     setStatus(authStatus, "Supabase設定を確認してください。", "error");
@@ -163,7 +182,7 @@ const signIn = async () => {
 
   const { error } = await client.auth.signInWithPassword({ email, password });
   if (error) {
-    setStatus(authStatus, `ログインに失敗しました: ${error.message}`, "error");
+    setStatus(authStatus, getAuthMessage(error, "ログインに失敗しました"), "error");
     setAuthBusy(false);
   }
 };
@@ -185,7 +204,19 @@ const signUp = async () => {
 
   const { data, error } = await client.auth.signUp({ email, password });
   if (error) {
-    setStatus(authStatus, `新規登録に失敗しました: ${error.message}`, "error");
+    const authMessage = getAuthMessage(error, "新規登録に失敗しました");
+
+    if (authMessage.includes("登録済み")) {
+      setStatus(authStatus, authMessage);
+      const { error: signInError } = await client.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setStatus(authStatus, getAuthMessage(signInError, "登録済みですがログインに失敗しました"), "error");
+        setAuthBusy(false);
+      }
+      return;
+    }
+
+    setStatus(authStatus, authMessage, "error");
     setAuthBusy(false);
     return;
   }
