@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ひとこと掲示板</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="board-shell">
+    <section class="composer" aria-labelledby="board-title">
+      <div class="heading-block">
+        <p class="eyebrow">SNS Board</p>
+        <h1 id="board-title">ひとこと掲示板</h1>
+      </div>
+
+      <form id="post-form" class="post-form" autocomplete="off">
+        <label>
+          <span>名前</span>
+          <input id="name" name="name" type="text" maxlength="24" placeholder="例: あおい" required>
+        </label>
+
+        <label>
+          <span>本文</span>
+          <textarea id="message" name="message" maxlength="180" rows="4" placeholder="いま思ったことをひとこと" required></textarea>
+        </label>
+
+        <div class="form-actions">
+          <p id="counter" class="counter">0 / 180</p>
+          <button id="submit-button" type="submit">送信</button>
+        </div>
+      </form>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="timeline" aria-labelledby="timeline-title">
+      <div class="timeline-header">
+        <h2 id="timeline-title">投稿一覧</h2>
+        <button id="reload-posts" class="ghost-button" type="button">更新</button>
+      </div>
+      <ul id="post-list" class="post-list"></ul>
+      <p id="empty-state" class="empty-state">まだ投稿はありません。</p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
