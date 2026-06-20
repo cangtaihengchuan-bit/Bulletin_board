@@ -190,13 +190,17 @@ const signUp = async () => {
     return;
   }
 
-  if (!data.session) {
-    setStatus(authStatus, "確認メールを送信しました。メール内のリンクを開いてからログインしてください。", "success");
-    setAuthBusy(false);
+  if (data.session) {
+    setStatus(authStatus, "登録してログインしました。", "success");
     return;
   }
 
-  setStatus(authStatus, "登録してログインしました。", "success");
+  const { error: signInError } = await client.auth.signInWithPassword({ email, password });
+  if (signInError) {
+    setStatus(authStatus, "Supabase側のメール確認が有効です。AuthenticationのEmail設定でConfirm emailをOFFにしてください。", "error");
+    setAuthBusy(false);
+    return;
+  }
 };
 
 const signOut = async () => {
